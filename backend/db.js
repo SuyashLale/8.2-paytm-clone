@@ -39,8 +39,10 @@ const accountSchema = new mongoose.Schema({
     ref: "User",
     required: true,
   },
-  balance: Number,
-  require: true,
+  balance: {
+    type: Number,
+    required: true,
+  },
 });
 
 // Mongoose automatically looks for the plural, lowercased version of the model name,
