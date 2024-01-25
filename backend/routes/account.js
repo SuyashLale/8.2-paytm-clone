@@ -1,5 +1,6 @@
 const express = require("express");
-const { Account, User } = require("../db");
+const mongoose = require("mongoose");
+const { Account } = require("../db");
 const { authMiddleware } = require("./middleware");
 
 const router = express.Router();
@@ -25,35 +26,52 @@ router.get("/balance", authMiddleware, async (req, res) => {
 // POST transfer money to another account
 router.post("/transfer", authMiddleware, async (req, res) => {
   try {
+    // Start and session and a transaction
+    const session = await mongoose.startSession();
+    session.startTransaction();
     const { to, amount } = req.body;
-    const fromAccount = Account.findOne({ userId: req.userId });
+    const fromAccount = Account.findOne({ userId: req.userId }).session(
+      session
+    );
     if (fromAccount.balance < amount) {
+      await session.abortTransaction();
       return res.status(400).json({
         message: "Insufficient funds",
       });
     } else {
       const toAccount = Account.findOne({ userId: to });
       if (!toAccount) {
+        session.abortTransaction();
         return res.status(400).json({
           message: "Invalid account",
         });
       }
-      await fromAccount.updateOne(
-        { userId: req.userId },
-        {
-          $inc: {
-            balance: -amount,
-          },
-        }
-      );
-      await toAccount.updateOne(
-        { userId: to },
-        {
-          $inc: {
-            balance: amount,
-          },
-        }
-      );
+      await fromAccount
+        .updateOne(
+          { userId: req.userId },
+          {
+            $inc: {
+              balance: -amount,
+            },
+          }
+        )
+        .session(session);
+      await toAccount
+        .updateOne(
+          { userId: to },
+          {
+            $inc: {
+              balance: amount,
+            },
+          }
+        )
+        .session(session);
+
+      // Commit
+      await session.commitTransaction();
+      res.status(200).json({
+        message: "Transfer successful",
+      });
     }
   } catch (e) {
     console.log("Internal Error POST /transfer", e);
