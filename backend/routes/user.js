@@ -11,7 +11,7 @@ const router = express.Router();
 
 const signUpRequestBody = zod.object({
   username: zod.string().email(),
-  password: zod.string().password().min(6),
+  password: zod.string(),
   firstName: zod.string().max(50),
   lastName: zod.string().max(50),
 });
@@ -25,7 +25,7 @@ router.post("/signup", async (req, res) => {
         message: "Incorrect inputs",
       });
     } else {
-      const dbResult = await User.find({ username: req.body.username });
+      const dbResult = await User.findOne({ username: req.body.username });
       if (dbResult) {
         res.status(411).json({
           message: "Email already taken",
@@ -57,10 +57,15 @@ router.post("/signup", async (req, res) => {
   }
 });
 
+const signinBody = zod.object({
+  username: zod.string().email(),
+  password: zod.string(),
+});
+
 //Sign-in route
 router.post("/signin", async (req, res) => {
   try {
-    const { success } = signUpRequestBody.safeParse(req.body);
+    const { success } = signinBody.safeParse(req.body);
     if (!success) {
       res.status(411).json({
         message: "Invalid inputs",
@@ -89,11 +94,11 @@ router.post("/signin", async (req, res) => {
 
 // Update User info
 const updateUserInfoReqBody = zod.object({
-  password: zod.password().min(6).optional(),
+  password: zod.string().optional(),
   firstName: zod.string().optional(),
   lastName: zod.string().optional(),
 });
-router.put("/user", authMiddleware, async (req, res) => {
+router.put("/", authMiddleware, async (req, res) => {
   try {
     const { success } = updateUserInfoReqBody.safeParse(req.body);
     if (!success) {
