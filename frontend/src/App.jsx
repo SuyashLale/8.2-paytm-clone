@@ -9,15 +9,17 @@ import { SendMoney } from "./pages/SendMoney";
 
 function App() {
   return (
-    <div>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/signup" element={<SignUp />} />
-          <Route path="/signin" element={<SignIn />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/send" element={<SendMoney />} />
-        </Routes>
-      </BrowserRouter>
+    <div className="flex justify-center">
+      <div className="w-3/5">
+        <BrowserRouter>
+          <Routes>
+            <Route path="/signup" element={<SignUp />} />
+            <Route path="/signin" element={<SignIn />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/send" element={<SendMoney />} />
+          </Routes>
+        </BrowserRouter>
+      </div>
     </div>
   );
 }
