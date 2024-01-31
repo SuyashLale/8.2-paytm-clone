@@ -1,25 +1,19 @@
 /* eslint-disable react/prop-types */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "../components/Button";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 export function Users() {
-  const [users, setUsers] = useState([
-    {
-      firstName: "Suyash",
-      lastName: "Lale",
-      _id: 1,
-    },
-    {
-      firstName: "Shreya",
-      lastName: "Gore",
-      _id: 2,
-    },
-    {
-      firstName: "Harkirat",
-      lastName: "Singh",
-      _id: 3,
-    },
-  ]);
+  const [users, setUsers] = useState([]);
+  const [filter, setFileter] = useState("");
+
+  useEffect(() => {
+    axios
+      .get("http://localhost:3000/api/v1/user/bulk?filter=" + filter)
+      .then((response) => setUsers(response.data.user));
+  }, [filter]);
+
   return (
     <div className="mx-4">
       <div className="font-bold mt-6 text-lg">Users</div>
@@ -28,6 +22,7 @@ export function Users() {
           type="text"
           placeholder="Search users..."
           className="mt-2 border border-slate-200 w-full px-2 py-1 rounded"
+          onChange={(e) => setFileter(e.target.value)}
         />
       </div>
       <div>
@@ -40,6 +35,7 @@ export function Users() {
 }
 
 function User({ user }) {
+  const navigate = useNavigate();
   return (
     <div className="flex justify-between items-center">
       <div className="flex items-center">
@@ -53,7 +49,12 @@ function User({ user }) {
         </div>
       </div>
       <div className="h-full w-max flex items-center">
-        <Button label={"Send Money"} onClick={() => {}} />
+        <Button
+          label={"Send Money"}
+          onClick={(e) => {
+            navigate("/send?id=" + user._id + "&name=" + user.firstName);
+          }}
+        />
       </div>
     </div>
   );

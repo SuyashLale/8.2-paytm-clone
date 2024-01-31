@@ -9,8 +9,8 @@ import { SendMoney } from "./pages/SendMoney";
 
 function App() {
   return (
-    <div className="flex justify-center">
-      <div className="w-3/5">
+    <div>
+      <div>
         <BrowserRouter>
           <Routes>
             <Route path="/signup" element={<SignUp />} />
